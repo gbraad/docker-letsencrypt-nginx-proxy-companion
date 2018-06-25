@@ -13,6 +13,7 @@ export -f get_base_domain
 function run_le_container {
   local image="${1:?}"
   local name="${2:?}"
+  local cli_param="${3:-}"
   if [[ "$SETUP" == '3containers' ]]; then
     docker_gen_arg="--env NGINX_DOCKER_GEN_CONTAINER=$DOCKER_GEN_CONTAINER_NAME"
   else
@@ -27,6 +28,7 @@ function run_le_container {
     --env "DEBUG=true" \
     --env "ACME_CA_URI=http://${BOULDER_IP}:4000/directory" \
     --label com.github.jrcs.letsencrypt_nginx_proxy_companion.test_suite \
+    $cli_param \
     "$image" > /dev/null && echo "Started letsencrypt container for test ${name%%_2*}"
 }
 export -f run_le_container
