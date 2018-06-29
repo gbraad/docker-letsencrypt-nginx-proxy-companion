@@ -45,6 +45,8 @@ function create_links {
 }
 
 function cleanup_links {
+    local -a LETSENCRYPT_CONTAINERS
+    local -a LETSENCRYPT_STANDALONE_CERTS
     local -a ENABLED_DOMAINS
     local -a SYMLINKED_DOMAINS
     local -a DISABLED_DOMAINS
@@ -61,7 +63,6 @@ function cleanup_links {
 
     # Create an array containing domains that are considered
     # enabled (ie present on /app/letsencrypt_service_data or /app/letsencrypt_user_data).
-    unset LETSENCRYPT_CONTAINERS && declare -a LETSENCRYPT_CONTAINERS
     [[ -f /app/letsencrypt_service_data ]] && source /app/letsencrypt_service_data
     [[ -f /app/letsencrypt_user_data ]] && source /app/letsencrypt_user_data
     LETSENCRYPT_CONTAINERS+=( "${LETSENCRYPT_STANDALONE_CERTS[@]}" )
@@ -122,18 +123,19 @@ function cleanup_links {
 }
 
 function update_certs {
+    local -a LETSENCRYPT_CONTAINERS
+    local -a LETSENCRYPT_STANDALONE_CERTS
 
     check_nginx_proxy_container_run || return
 
     # Load relevant container settings
-    unset LETSENCRYPT_CONTAINERS && declare -a LETSENCRYPT_CONTAINERS
-
     if [[ -f /app/letsencrypt_service_data ]]; then
         source /app/letsencrypt_service_data
     else
         echo "Info: /app/letsencrypt_service_data not found, skipping data from containers."
     fi
 
+    # Load settings for standalone certs
     if [[ -f /app/letsencrypt_user_data ]]; then
         if source /app/letsencrypt_user_data; then
             if [[ -w /etc/nginx/conf.d ]]; then
