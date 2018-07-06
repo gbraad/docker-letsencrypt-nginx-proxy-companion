@@ -270,8 +270,8 @@ function update_certs {
     cleanup_links && should_reload_nginx='true'
 
     for domain in "${!hosts_array}"; do
-        if [[ -f "/etc/nginx/conf.d/$domain-standalone-cert.conf" && -w /etc/nginx/conf.d ]]; then
-            rm -f "/etc/nginx/conf.d/$domain-standalone-cert.conf" && should_reload_nginx='true'
+        if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && -w /etc/nginx/conf.d ]]; then
+            rm -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && should_reload_nginx='true'
         fi
     done
 

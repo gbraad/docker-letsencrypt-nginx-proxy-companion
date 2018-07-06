@@ -38,7 +38,7 @@ function add_location_configuration {
 
 function add_standalone_configuration {
     local domain="${1:?}"
-    cat > "/etc/nginx/conf.d/$domain-standalone-cert.conf" << EOF
+    cat > "/etc/nginx/conf.d/standalone-cert-$domain.conf" << EOF
 server {
     server_name $domain;
     listen 80;
