@@ -11,17 +11,17 @@ fi
 # Create the $domains array from comma separated domains in TEST_DOMAINS.
 IFS=',' read -r -a domains <<< "$TEST_DOMAINS"
 
+# Create letsencrypt_user_data with a single domain cert
 cat > ${TRAVIS_BUILD_DIR}/test/tests/certs_standalone/letsencrypt_user_data <<EOF
-LETSENCRYPT_STANDALONE_CERTS=('single' 'san')
+LETSENCRYPT_STANDALONE_CERTS=('single')
 LETSENCRYPT_single_HOST=('${domains[0]}')
-LETSENCRYPT_san_HOST=('${domains[1]}' '${domains[2]}')
 EOF
 
 run_le_container ${1:?} "$le_container_name" \
   "--volume ${TRAVIS_BUILD_DIR}/test/tests/certs_standalone/letsencrypt_user_data:/app/letsencrypt_user_data"
 
-  # Wait for a symlink at /etc/nginx/certs/${domains[0]}.crt
-  # then grab the certificate in text form ...
+# Wait for a symlink at /etc/nginx/certs/${domains[0]}.crt
+# then grab the certificate in text form ...
 wait_for_symlink "${domains[0]}" "$le_container_name"
 created_cert="$(docker exec "$le_container_name" \
   openssl x509 -in /etc/nginx/certs/${domains[0]}/cert.pem -text -noout)"
@@ -32,6 +32,16 @@ if grep -q "${domains[0]}" <<< "$created_cert"; then
 else
   echo "Domain ${domains[0]} did not appear on certificate."
 fi
+
+# Add another (SAN) certificate to letsencrypt_user_data
+cat > ${TRAVIS_BUILD_DIR}/test/tests/certs_standalone/letsencrypt_user_data <<EOF
+LETSENCRYPT_STANDALONE_CERTS=('single' 'san')
+LETSENCRYPT_single_HOST=('${domains[0]}')
+LETSENCRYPT_san_HOST=('${domains[1]}' '${domains[2]}')
+EOF
+
+# Manually trigger the service loop
+docker exec "$le_container_name" /app/signal_le_service > /dev/null
 
 # Wait for a symlink at /etc/nginx/certs/${domains[1]}.crt
 # then grab the certificate in text form ...
