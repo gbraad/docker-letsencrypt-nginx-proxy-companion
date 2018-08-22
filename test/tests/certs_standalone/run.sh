@@ -33,6 +33,9 @@ else
   echo "Domain ${domains[0]} did not appear on certificate."
 fi
 
+docker exec "$le_container_name" bash -c "[[ -f /etc/nginx/conf.d/standalone-cert-${domains[0]}.conf ]]" \
+  && echo "Standalone configuration for ${domains[0]} wasn't correctly removed."
+
 # Add another (SAN) certificate to letsencrypt_user_data
 cat > ${TRAVIS_BUILD_DIR}/test/tests/certs_standalone/letsencrypt_user_data <<EOF
 LETSENCRYPT_STANDALONE_CERTS=('single' 'san')
@@ -57,6 +60,9 @@ for domain in "${domains[1]}" "${domains[2]}"; do
     echo "Domain $domain did not appear on certificate."
   fi
 done
+
+docker exec "$le_container_name" bash -c "[[ -f /etc/nginx/conf.d/standalone-cert-${domains[1]}.conf ]]" \
+  && echo "Standalone configuration for ${domains[1]} wasn't correctly removed."
 
 # Cleanup the files created by this run of the test to avoid foiling following test(s).
 docker exec "$le_container_name" sh -c 'rm -rf /etc/nginx/certs/le?.wtf*'
