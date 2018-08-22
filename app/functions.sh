@@ -54,6 +54,15 @@ server {
 EOF
 }
 
+function remove_all_standalone_configurations {
+    local old_shopt_options=$(shopt -p) # Backup shopt options
+    shopt -s nullglob
+    for file in "/etc/nginx/conf.d/standalone-cert-"*".conf"; do
+      rm -f "$file"
+    done
+    eval "$old_shopt_options" # Restore shopt options
+}
+
 function remove_all_location_configurations {
     local old_shopt_options=$(shopt -p) # Backup shopt options
     shopt -s nullglob
