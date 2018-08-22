@@ -271,6 +271,7 @@ function update_certs {
 
     for domain in "${!hosts_array}"; do
         if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && -w /etc/nginx/conf.d ]]; then
+            [[ $DEBUG == true ]] && echo "Debug: removing standalone configuration file /etc/nginx/conf.d/standalone-cert-$domain.conf"
             rm -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && should_reload_nginx='true'
         fi
     done
