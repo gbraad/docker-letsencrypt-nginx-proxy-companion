@@ -132,25 +132,21 @@ function update_certs {
     if [[ -f /app/letsencrypt_service_data ]]; then
         source /app/letsencrypt_service_data
     else
-        echo "Info: /app/letsencrypt_service_data not found, skipping data from containers."
+        echo "Warning: /app/letsencrypt_service_data not found, skipping data from containers."
     fi
 
     # Load settings for standalone certs
     if [[ -f /app/letsencrypt_user_data ]]; then
         if source /app/letsencrypt_user_data; then
-            if [[ -w /etc/nginx/conf.d ]]; then
-                for cid in "${LETSENCRYPT_STANDALONE_CERTS[@]}"; do
-                    host_varname="LETSENCRYPT_${cid}_HOST"
-                    hosts_array="${host_varname}[@]"
-                    for domain in "${!hosts_array}"; do
-                        add_standalone_configuration "$domain"
-                    done
+            for cid in "${LETSENCRYPT_STANDALONE_CERTS[@]}"; do
+                host_varname="LETSENCRYPT_${cid}_HOST"
+                hosts_array="${host_varname}[@]"
+                for domain in "${!hosts_array}"; do
+                    add_standalone_configuration "$domain"
                 done
-                reload_nginx
-                LETSENCRYPT_CONTAINERS+=( "${LETSENCRYPT_STANDALONE_CERTS[@]}" )
-            else
-                echo "Warning: /etc/nginx/conf.d is not writable, skipping user data."
-            fi
+            done
+            reload_nginx
+            LETSENCRYPT_CONTAINERS+=( "${LETSENCRYPT_STANDALONE_CERTS[@]}" )
         else
             echo "Warning: could not source /app/letsencrypt_user_data, skipping user data"
         fi
@@ -270,7 +266,7 @@ function update_certs {
     cleanup_links && should_reload_nginx='true'
 
     for domain in "${!hosts_array}"; do
-        if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && -w /etc/nginx/conf.d ]]; then
+        if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" ]]; then
             [[ $DEBUG == true ]] && echo "Debug: removing standalone configuration file /etc/nginx/conf.d/standalone-cert-$domain.conf"
             rm -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && should_reload_nginx='true'
         fi

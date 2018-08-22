@@ -53,7 +53,7 @@ function check_dh_group {
 
     # If a dhparam file is not available, use the pre-generated one and generate a new one in the background.
     local PREGEN_DHPARAM_FILE="/app/dhparam.pem.default"
-    local DHPARAM_FILE="/etc/nginx/certs/dhparam.pem"
+    local DHPARAM_FILE="/etc/nginx/certs/dpharam.pem"
     local GEN_LOCKFILE="/tmp/le_companion_dhparam_generating.lock"
 
     # The hash of the pregenerated dhparam file is used to check if the pregen dhparam is already in use
@@ -157,6 +157,7 @@ if [[ "$*" == "/bin/bash /app/start.sh" ]]; then
     check_writable_directory '/etc/nginx/certs'
     check_writable_directory '/etc/nginx/vhost.d'
     check_writable_directory '/usr/share/nginx/html'
+    [[ -f /app/letsencrypt_user_data ]] && check_writable_directory '/etc/nginx/conf.d'
     check_deprecated_env_var
     check_default_cert_key
     check_dh_group
