@@ -261,16 +261,16 @@ function update_certs {
           [[ $simp_le_return -eq 0 ]] && should_reload_nginx='true'
         fi
 
+        for domain in "${!hosts_array}"; do
+            if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" ]]; then
+                [[ $DEBUG == true ]] && echo "Debug: removing standalone configuration file /etc/nginx/conf.d/standalone-cert-$domain.conf"
+                rm -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && should_reload_nginx='true'
+            fi
+        done
+
     done
 
     cleanup_links && should_reload_nginx='true'
-
-    for domain in "${!hosts_array}"; do
-        if [[ -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" ]]; then
-            [[ $DEBUG == true ]] && echo "Debug: removing standalone configuration file /etc/nginx/conf.d/standalone-cert-$domain.conf"
-            rm -f "/etc/nginx/conf.d/standalone-cert-$domain.conf" && should_reload_nginx='true'
-        fi
-    done
 
     [[ "$should_reload_nginx" == 'true' ]] && reload_nginx
 }
